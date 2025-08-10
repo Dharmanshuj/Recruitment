@@ -1,7 +1,6 @@
 package com.zinios.onboard.DTO;
 
 import com.zinios.onboard.Entity.UserType;
-import jakarta.persistence.Entity;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

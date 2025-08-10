@@ -1,8 +1,10 @@
 package com.zinios.onboard.controller;
 
 import com.zinios.onboard.DTO.ChangePasswordRequest;
+import com.zinios.onboard.DTO.InviteRequestDTO;
 import com.zinios.onboard.DTO.UserRequest;
 import com.zinios.onboard.Entity.User;
+import com.zinios.onboard.service.InviteService;
 import com.zinios.onboard.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final InviteService inviteService;
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
@@ -48,4 +51,15 @@ public class UserController {
         userService.changePassword(email, changePasswordRequest);
         return ResponseEntity.ok("Password changed successfully");
     }
+
+    @PostMapping("/sendInvite")
+    @PreAuthorize("hasAuthority('RECRUITER')")
+    @Operation(summary = "Invite", description = "Send Invitation to recruit")
+    public ResponseEntity<String> sendInvite(@RequestBody InviteRequestDTO request) {
+        inviteService.sendInvite(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Invite send successfully");
+    }
+
+    @PostMapping("/")
+    public ResponseEntity<String>
 }

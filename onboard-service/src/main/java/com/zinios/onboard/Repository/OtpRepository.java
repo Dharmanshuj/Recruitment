@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface OtpRepository extends JpaRepository<Otp, Integer> {
+public interface OtpRepository extends JpaRepository<Otp, Long> {
     Optional<Otp> findTopByEmailAndOtpAndIsActiveTrueOrderByCreatedTimeDesc(String email, String otp);
 
     @Transactional

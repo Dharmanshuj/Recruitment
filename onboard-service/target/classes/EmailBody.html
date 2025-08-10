@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interview Invitation</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+<div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 6px; background-color: #fff;">
+    <h2 style="color: #4CAF50;">Interview Invitation</h2>
+
+    <p>Dear <strong>${CANDIDATE_NAME}</strong>,</p>
+
+    <p>We are pleased to invite you to the next step of the recruitment process at <strong>ZiniosEdge</strong>.</p>
+
+    <p>Please select one of the following options:</p>
+
+    <p style="margin-top: 20px;">
+        <a href="${ACCEPT_LINK}"
+           style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+            ✅ Accept Invitation
+        </a>
+    </p>
+
+    <p style="margin-top: 10px;">
+        <a href="${REJECT_LINK}"
+           style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+            ❌ Reject Invitation
+        </a>
+    </p>
+
+    <p style="margin-top: 30px;">
+        This link is unique to you and will expire in <strong>${EXPIRY_DAYS}</strong> days.
+    </p>
+
+    <p>If you have any questions, feel free to reach out to your recruiter.</p>
+
+    <p>Best regards,<br><strong>ZiniosEdge Recruitment Team</strong></p>
+</div>
+</body>
+</html>

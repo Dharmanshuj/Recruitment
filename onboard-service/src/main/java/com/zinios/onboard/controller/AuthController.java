@@ -5,6 +5,7 @@ import com.zinios.onboard.Entity.User;
 import com.zinios.onboard.Repository.UserRepository;
 import com.zinios.onboard.exception.ZiniosException;
 import com.zinios.onboard.service.AuthService;
+import com.zinios.onboard.service.InviteService;
 import com.zinios.onboard.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +28,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final AuthService authService;
     private final UserService userService;
+    private final InviteService inviteService;
 
     @PostMapping("/login")
     @Operation(summary = "Login", description = "Authenticate user and return JWT token")
@@ -67,5 +69,15 @@ public class AuthController {
     public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
         authService.resetPassword(request);
         return ResponseEntity.ok("Password is reset successfully");
+    }
+
+    @PutMapping("respond/{invite_id}/{status}")
+    @Operation(summary = "Respond", description = "Accept or Reject the opportunity")
+    public ResponseEntity<String> respondToInvite(@PathVariable("invite_id") Long inviteId, @PathVariable("status") String status, @RequestParam String password) {
+        boolean updated = inviteService.updateStatus(inviteId, status, password);
+        if(!updated) {
+            return ResponseEntity.badRequest().body("Invalid invite ID or status");
+        }
+        return ResponseEntity.ok("Invite status updated to: " + status);
     }
 }

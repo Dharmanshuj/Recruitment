@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class JWTResponse {
     private String token;
     private String type = "Bearer";
-    private Integer id;
+    private Long id;
     private String name;
     private String email;
     private String userType;
