@@ -1,17 +1,13 @@
 package com.zinios.onboard.service;
 
-import com.zinios.onboard.DTO.ChangePasswordRequest;
-import com.zinios.onboard.DTO.ForgotPasswordRequest;
 import com.zinios.onboard.DTO.LoginRequest;
 import com.zinios.onboard.DTO.ResetPasswordRequest;
 import com.zinios.onboard.Entity.Otp;
 import com.zinios.onboard.Entity.User;
-import com.zinios.onboard.Mapper.UserMapper;
+import com.zinios.onboard.Mapper.Mapper;
 import com.zinios.onboard.Repository.OtpRepository;
 import com.zinios.onboard.Repository.UserRepository;
 import com.zinios.onboard.exception.ZiniosException;
-import jakarta.mail.MessagingException;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -34,7 +29,7 @@ public class AuthService {
     private final JwtService jwtUtil;
     private final EmailService emailService;
     private final OtpRepository otpRepository;
-    private final UserMapper mapper;
+    private final Mapper mapper;
     private final PasswordEncoder passwordEncoder;
 
     public String authenticateUserAndGenerateToken(LoginRequest loginRequest) {

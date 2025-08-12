@@ -1,13 +1,11 @@
 package com.zinios.onboard.service;
 
 import com.zinios.onboard.DTO.InviteRequestDTO;
-import com.zinios.onboard.DTO.UserRequest;
 import com.zinios.onboard.Entity.ENUM.InviteStatus;
 import com.zinios.onboard.Entity.Invite;
 import com.zinios.onboard.Entity.User;
 import com.zinios.onboard.Entity.UserType;
-import com.zinios.onboard.Mapper.UserFromInvite;
-import com.zinios.onboard.Mapper.UserFromUserRequest;
+import com.zinios.onboard.Mapper.UserMapper;
 import com.zinios.onboard.Repository.CandidateRepository;
 import com.zinios.onboard.Repository.InviteRepository;
 import com.zinios.onboard.Repository.UserRepository;
@@ -15,16 +13,12 @@ import com.zinios.onboard.exception.ZiniosException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +26,7 @@ public class InviteService {
     private final InviteRepository inviteRepository;
     private final EmailService emailService;
     private final UserRepository userRepository;
-    private final CandidateRepository candidateRepository;
-    private final UserFromInvite mapper;
+    private final UserMapper mapper;
 
     public static final String inviteLink = "http://localhost:8082/api/auth/respond";
     public void sendInvite(InviteRequestDTO request) {

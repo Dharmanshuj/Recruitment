@@ -1,7 +1,7 @@
 package com.zinios.onboard.service;
 
 import com.zinios.onboard.Entity.User;
-import com.zinios.onboard.Mapper.UserMapper;
+import com.zinios.onboard.Mapper.Mapper;
 import com.zinios.onboard.Repository.UserRepository;
 import com.zinios.onboard.exception.ZiniosException;
 import io.jsonwebtoken.*;
@@ -31,7 +31,7 @@ public class JwtService {
     private long jwtExpiration;
 
     private final UserRepository userRepository;
-    private final UserMapper mapper;
+    private final Mapper mapper;
 
     public String generateToken(String email) {
         User user = userRepository.findByEmail(email)

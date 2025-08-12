@@ -14,13 +14,17 @@ import java.time.LocalDateTime;
 @Data
 public class Candidate{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
     @Column(unique = true)
     private String email;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "candidate_id", nullable = false)
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruiter_id", nullable = false)
@@ -47,5 +51,13 @@ public class Candidate{
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedTime;
+
+    @OneToOne(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private CandidateProDetails candidateProDetails;
+
+    @OneToOne(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private CandidateDoc candidateDoc;
+
+
 }
 

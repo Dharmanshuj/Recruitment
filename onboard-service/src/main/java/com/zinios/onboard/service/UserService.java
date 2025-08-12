@@ -1,10 +1,13 @@
 package com.zinios.onboard.service;
 
+import com.zinios.onboard.DTO.CandidateRequestDTO;
+import com.zinios.onboard.DTO.CandidateUpdateDTO;
 import com.zinios.onboard.DTO.ChangePasswordRequest;
 import com.zinios.onboard.DTO.UserRequest;
 import com.zinios.onboard.Entity.User;
 import com.zinios.onboard.Entity.UserType;
-import com.zinios.onboard.Mapper.UserFromUserRequest;
+import com.zinios.onboard.Mapper.UserMapper;
+import com.zinios.onboard.Repository.CandidateRepository;
 import com.zinios.onboard.Repository.UserRepository;
 import com.zinios.onboard.exception.ZiniosException;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +19,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final UserFromUserRequest mapper;
+    private final UserMapper mapper;
     private final PasswordEncoder passwordEncoder;
+    private final CandidateRepository candidateRepository;
 
     public User registerUser(UserRequest request, String createdBy) {
         if(userRepository.existsByEmail(request.getEmail())) {
@@ -68,5 +72,18 @@ public class UserService {
         }
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
+    }
+
+    public void savePersonalDetails(CandidateRequestDTO dto) {
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new ZiniosException("No User found", HttpStatus.BAD_REQUEST));
+        if(user.getUserType() != UserType.CANDIDATE) {
+            throw new ZiniosException("Not a candidate", HttpStatus.BAD_REQUEST);
+        }
+        mapper.toCandidate(user, dto);
+    }
+
+    public void updatePersonalDetails(String email, CandidateUpdateDTO dto) {
+        mapper.updateCandidate(email, dto);
     }
 }
