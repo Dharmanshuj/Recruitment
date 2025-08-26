@@ -3,10 +3,14 @@ package com.zinios.onboard.controller;
 import com.zinios.onboard.DTO.*;
 import com.zinios.onboard.Entity.Candidate;
 import com.zinios.onboard.Entity.User;
+import com.zinios.onboard.Repository.CandidateRepository;
 import com.zinios.onboard.exception.ZiniosException;
+import com.zinios.onboard.service.CandidateService;
 import com.zinios.onboard.service.InviteService;
+import com.zinios.onboard.service.JwtService;
 import com.zinios.onboard.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,12 +20,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
     private final InviteService inviteService;
+    private final CandidateService candidateService;
+    private final JwtService jwtService;
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
@@ -52,24 +60,35 @@ public class UserController {
     @PostMapping("/sendInvite")
     @PreAuthorize("hasAuthority('RECRUITER')")
     @Operation(summary = "Invite", description = "Send Invitation to recruit")
-    public ResponseEntity<String> sendInvite(@RequestBody InviteRequestDTO request) {
+    public ResponseEntity<String> sendInvite(@RequestBody @Valid InviteRequestDTO request) {
         inviteService.sendInvite(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("Invite send successfully");
     }
 
-    @PostMapping("/saveDetails")
-    @PreAuthorize("hasAuthority('CANDIDATE')")
-    public ResponseEntity<String> savePersonalDetails(@RequestBody CandidateRequestDTO dto) {
-        userService.savePersonalDetails(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Personal Details saved successfully");
+    @GetMapping("/getAllCandidate")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'HR')")
+    public ResponseEntity<List<CandidateResponseDTO>> getCandidates() {
+        return ResponseEntity.ok(candidateService.getAllCandidates());
     }
 
-    @PutMapping("/updateDetails")
-    @PreAuthorize("hasAuthority('CANDIDATE')")
-    public ResponseEntity<String> updatePersonalDetails(@RequestBody CandidateUpdateDTO dto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        userService.updatePersonalDetails(email, dto);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Personal Details updates successfully");
+    @DeleteMapping("/deleteUser")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'HR')")
+    public ResponseEntity<String> deleteUser(@RequestParam String email) {
+        userService.deleteUser(email);
+        return ResponseEntity.ok("Deleted Successfully");
+    }
+
+    @GetMapping("/getCandidates")
+    @PreAuthorize("hasAuthority('RECRUITER')")
+    public ResponseEntity<List<CandidateResponseDTO>> getCandidates(@RequestHeader("Authorization") String auth) {
+        Long id = jwtService.getUserIdFromAuthHeader(auth);
+        return ResponseEntity.ok(candidateService.getCandidatesById(id));
+    }
+
+    @DeleteMapping("/deleteCandidate")
+    @PreAuthorize("hasAuthority('RECRUITER')")
+    public ResponseEntity<String> deleteCandidate(@RequestParam String email) {
+        candidateService.deleteCandidate(email);
+        return ResponseEntity.ok("Deleted Successfully");
     }
 }

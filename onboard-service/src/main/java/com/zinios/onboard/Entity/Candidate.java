@@ -22,11 +22,11 @@ public class Candidate{
     @Column(unique = true)
     private String email;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "candidate_id", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "recruiter_id", nullable = false)
     private User recruiterId;
 
@@ -34,6 +34,9 @@ public class Candidate{
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
+    @Column(name = "is_active")
+    private boolean isActive = true;
 
     private LocalDate dob;
 
@@ -52,10 +55,10 @@ public class Candidate{
     @Column(nullable = false)
     private LocalDateTime updatedTime;
 
-    @OneToOne(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
     private CandidateProDetails candidateProDetails;
 
-    @OneToOne(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
     private CandidateDoc candidateDoc;
 
 

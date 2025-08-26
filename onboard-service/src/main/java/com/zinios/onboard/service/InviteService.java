@@ -77,7 +77,7 @@ public class InviteService {
             invite.setUpdatedTime(LocalDateTime.now());
             inviteRepository.save(invite);
             if(inviteStatus == InviteStatus.ACCEPTED) {
-                User user = mapper.inviteToUser(invite.getCandidateEmail(),password, invite.getRecruiterId().getName());
+                User user = mapper.inviteToUser(invite, password);
                 userRepository.save(user);
             }
             return true;

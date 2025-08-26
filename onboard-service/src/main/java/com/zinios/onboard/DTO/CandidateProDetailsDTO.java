@@ -1,12 +1,11 @@
-package com.zinios.onboard.Entity;
+package com.zinios.onboard.DTO;
 
+import com.zinios.onboard.Entity.Candidate;
 import com.zinios.onboard.Entity.ENUM.CurrentStatus;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
@@ -15,18 +14,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-@Entity
 @Data
-@Table(name = "candidate_pro_details")
-@NoArgsConstructor
-public class CandidateProDetails {
-    @Id
-    @GeneratedValue
+public class CandidateProDetailsDTO {
     private Long id;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "candidate_id", nullable = false, unique = true)
-    private Candidate candidate;
+    private Long candidateId;
 
     private String currentOrg;
     private String currCTC;
@@ -34,33 +25,14 @@ public class CandidateProDetails {
     private LocalDate lastWD;
     private String designation;
     private String expCTC;
-
-    @Enumerated(EnumType.STRING)
     private CurrentStatus currStatus;
-
-    @Lob
     private String skills;
-
     private String totalEXP;
-
-    @Column(columnDefinition = "json")
-    @JdbcTypeCode(SqlTypes.JSON)
     private List<Map<String, Object>> projects; // JSON list
-
-    @Column(columnDefinition = "json")
-    @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> prevOrg; // JSON object
-
     private String prevOrgManagerEmail;
-
     private String createdBy;
     private String updatedBy;
-
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
     private LocalDateTime createdTime;
-
-    @UpdateTimestamp
-    @Column(nullable = false)
     private LocalDateTime updatedTime;
 }

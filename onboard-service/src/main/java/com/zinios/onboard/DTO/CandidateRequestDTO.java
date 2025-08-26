@@ -7,19 +7,14 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 @Data
 public class CandidateRequestDTO {
 
-    @NotBlank(message = "Recruiter ID is required")
-    private Long recruiterId;
-
     @NotBlank(message = "Name is required")
     private String name;
-
-    @Email(message = "Invalid email format")
-    @NotBlank(message = "Email is required")
-    private String email;
 
     @Pattern(regexp = "\\d{10}", message = "Phone number must be 10 digits")
     private String phoneNumber;
@@ -72,9 +67,9 @@ public class CandidateRequestDTO {
     private String totalEXP;
 
     @Size(max = 4000, message = "projects must not exceed 4000 characters")
-    private String projects;
+    private List<Map<String, Object>> projects;
 
-    private String prevOrg;
+    private Map<String, Object> prevOrg;
 
     @Email(message = "prevOrgManagerEmail must be a valid email")
     private String prevOrgManagerEmail;

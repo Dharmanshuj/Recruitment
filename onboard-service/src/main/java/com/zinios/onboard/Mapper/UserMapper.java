@@ -1,18 +1,12 @@
 package com.zinios.onboard.Mapper;
 
-import com.zinios.onboard.DTO.CandidateRequestDTO;
-import com.zinios.onboard.DTO.CandidateUpdateDTO;
-import com.zinios.onboard.DTO.UserRequest;
-import com.zinios.onboard.Entity.Candidate;
-import com.zinios.onboard.Entity.CandidateProDetails;
-import com.zinios.onboard.Entity.User;
-import com.zinios.onboard.Entity.UserType;
+import com.zinios.onboard.DTO.*;
+import com.zinios.onboard.Entity.*;
 import com.zinios.onboard.Repository.CandidateProDetailsRepository;
 import com.zinios.onboard.Repository.CandidateRepository;
 import com.zinios.onboard.Repository.UserRepository;
-import com.zinios.onboard.exception.ZiniosException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -40,40 +34,28 @@ public class UserMapper {
 
         return user;
     }
-    public User inviteToUser(String email, String password, String createdBy) {
+    public User inviteToUser(Invite invite, String password) {
         User user = new User();
+        User recruiter = invite.getRecruiterId();
         user.setName("Candidate" + UUID.randomUUID());
         user.setPassword(passwordEncoder.encode(password));
-        user.setEmail(email);
+        user.setEmail(invite.getCandidateEmail());
+        user.setReferenceId(recruiter.getId());
         user.setUserType(UserType.CANDIDATE);
         user.setActive(true);
-        user.setCreatedBy(createdBy);
-        user.setUpdatedBy(createdBy);
+        user.setCreatedBy(recruiter.getName());
+        user.setUpdatedBy(recruiter.getName());
         return user;
     }
 
-    public void toCandidate(User user, CandidateRequestDTO dto) {
-        if (user == null) {
-            throw new IllegalArgumentException("User cannot be null");
-        }
-        if (dto == null) {
-            throw new IllegalArgumentException("CandidateDTO cannot be null");
-        }
-
-        // Recruiter lookup (foreign key to User)
-        User recruiter = userRepository.findById(dto.getRecruiterId())
-                .orElseThrow(() -> new ZiniosException("Recruiter not found", HttpStatus.BAD_REQUEST));
-
+    @Transactional
+    public Candidate toCandidate(User recruiter, CandidateRequestDTO dto) {
+        // Build Candidate
         Candidate candidate = new Candidate();
-        CandidateProDetails candidateProDetails = candidate.getCandidateProDetails();
-
-        // Link candidate -> user and recruiter
-        candidate.setUser(user);
-        candidate.setRecruiterId(recruiter); // assuming field type is User
+        candidate.setRecruiterId(recruiter); // or recruiter.getId() if field is Long
 
         // Personal info
         candidate.setName(dto.getName());
-        candidate.setEmail(dto.getEmail());
         candidate.setPhoneNumber(dto.getPhoneNumber());
         candidate.setGender(dto.getGender());
         candidate.setDob(dto.getDob());
@@ -85,40 +67,34 @@ public class UserMapper {
         candidate.setCountry(dto.getCountry());
         candidate.setPinCode(dto.getPinCode());
 
-        // Professional details (new in DTO)
-        candidateProDetails.setCurrentOrg(dto.getCurrentOrg());
-        candidateProDetails.setCurrCTC(dto.getCurrCTC());
-        candidateProDetails.setNoticePeriod(dto.getNoticePeriod());
-        candidateProDetails.setLastWD(dto.getLastWD());
-        candidateProDetails.setDesignation(dto.getDesignation());
-        candidateProDetails.setExpCTC(dto.getExpCTC());
-        candidateProDetails.setCurrStatus(dto.getCurrStatus());
-        candidateProDetails.setSkills(dto.getSkills());
-        candidateProDetails.setTotalEXP(dto.getTotalEXP());
-        candidateProDetails.setProjects(dto.getProjects());
-        candidateProDetails.setPrevOrg(dto.getPrevOrg());
-        candidateProDetails.setPrevOrgManagerEmail(dto.getPrevOrgManagerEmail());
-
         // Audit
         candidate.setCreatedBy(dto.getName());
         candidate.setUpdatedBy(dto.getName());
-
-        // Keep User table in sync (name/phone/email)
-        user.setName(dto.getName());
-        user.setPhoneNumber(dto.getPhoneNumber());
-        if (dto.getEmail() != null) {
-            user.setEmail(dto.getEmail());
-        }
-        userRepository.save(user);
-
-        candidateRepository.save(candidate);
-        candidateProDetailsRepository.save(candidateProDetails);
+        return candidate;
     }
 
-    public void updateCandidate(String email, CandidateUpdateDTO dto) {
-        Candidate candidate = candidateRepository.findByEmail(email)
-                .orElseThrow(() -> new ZiniosException("Candidate not found", HttpStatus.BAD_REQUEST));
-        if (candidate == null || dto == null) return;
+    public CandidateProDetails toProDetails(CandidateRequestDTO dto, Candidate candidate) {
+        CandidateProDetails pro = new CandidateProDetails();
+        pro.setCandidate(candidate); // FK (owning side)
+
+        // Professional details
+        pro.setCurrentOrg(dto.getCurrentOrg());
+        pro.setCurrCTC(dto.getCurrCTC());
+        pro.setNoticePeriod(dto.getNoticePeriod());
+        pro.setLastWD(dto.getLastWD());
+        pro.setDesignation(dto.getDesignation());
+        pro.setExpCTC(dto.getExpCTC());
+        pro.setCurrStatus(dto.getCurrStatus());
+        pro.setSkills(dto.getSkills());
+        pro.setTotalEXP(dto.getTotalEXP());
+        pro.setProjects(dto.getProjects());
+        pro.setPrevOrg(dto.getPrevOrg());
+        pro.setPrevOrgManagerEmail(dto.getPrevOrgManagerEmail());
+
+        return pro;
+    }
+
+    public void updateCandidate(Candidate candidate, CandidateUpdateDTO dto) {
 
         User user = candidate.getUser();
 
@@ -160,8 +136,95 @@ public class UserMapper {
         if (dto.getProjects() != null) candidateProDetails.setProjects(dto.getProjects());
         if (dto.getPrevOrg() != null) candidateProDetails.setPrevOrg(dto.getPrevOrg());
         if (dto.getPrevOrgManagerEmail() != null) candidateProDetails.setPrevOrgManagerEmail(dto.getPrevOrgManagerEmail());
-
-        userRepository.save(user);
     }
 
+    public CandidateResponseDTO toResponseDTO(Candidate candidate) {
+        if (candidate == null) return null;
+
+        CandidateResponseDTO dto = new CandidateResponseDTO();
+        dto.setId(safe(candidate::getId));
+        dto.setName(safe(candidate::getName));
+        dto.setEmail(safe(candidate::getEmail));
+        dto.setPhoneNumber(safe(candidate::getPhoneNumber));      // if present
+        dto.setGender(safe(candidate::getGender));                 // if present
+        dto.setMaritalStatus(safe(candidate::getMaritalStatus));   // if present
+        dto.setDob(safe(candidate::getDob));       // if present
+        dto.setCreatedBy(safe(candidate::getCreatedBy));
+        dto.setUpdatedBy(safe(candidate::getUpdatedBy));
+        dto.setCreatedTime(safe(candidate::getCreatedTime));
+        dto.setUpdatedTime(safe(candidate::getUpdatedTime));
+
+        dto.setUser(candidate.getUser() != null ? candidate.getUser().getId() : null);
+        dto.setRecruiterId(candidate.getRecruiterId() != null ? candidate.getRecruiterId().getId() : null);
+
+        CandidateProDetails pro = safe(candidate::getCandidateProDetails);
+        dto.setCandidateProDetails(pro != null ? toProDetailsDTO(pro) : null);
+
+        CandidateDoc doc = safe(candidate::getCandidateDoc);
+        dto.setCandidateDoc(doc != null ? toDocDTO(doc) : null);
+
+
+        return dto;
+    }
+
+    public CandidateProDetailsDTO toProDetailsDTO(CandidateProDetails entity) {
+        CandidateProDetailsDTO dto = new CandidateProDetailsDTO();
+        dto.setId(entity.getId());
+        dto.setCandidateId(entity.getCandidate() != null ? entity.getCandidate().getId() : null);
+
+        dto.setCurrentOrg(entity.getCurrentOrg());
+        dto.setCurrCTC(entity.getCurrCTC());
+        dto.setNoticePeriod(entity.getNoticePeriod());
+        dto.setLastWD(entity.getLastWD());
+        dto.setDesignation(entity.getDesignation());
+        dto.setExpCTC(entity.getExpCTC());
+        dto.setCurrStatus(entity.getCurrStatus());
+        dto.setSkills(entity.getSkills());
+        dto.setTotalEXP(entity.getTotalEXP());
+        dto.setProjects(entity.getProjects());
+        dto.setPrevOrg(entity.getPrevOrg());
+        dto.setPrevOrgManagerEmail(entity.getPrevOrgManagerEmail());
+        dto.setCreatedBy(entity.getCreatedBy());
+        dto.setUpdatedBy(entity.getUpdatedBy());
+        dto.setCreatedTime(entity.getCreatedTime());
+        dto.setUpdatedTime(entity.getUpdatedTime());
+
+        return dto;
+    }
+
+    public CandidateDocDTO toDocDTO(CandidateDoc entity) {
+        if (entity == null) return null;
+
+        CandidateDocDTO dto = new CandidateDocDTO();
+        dto.setCandidateId(entity.getCandidate() != null ? entity.getCandidate().getId() : null);
+        dto.setUanNo(entity.getUanNo());
+        dto.setPanNo(entity.getPanNo());
+        // DTO uses capital 'A' -> Aadhaar
+        dto.setAadhaar(entity.getAadhaar());
+        return dto;
+    }
+
+    public CandidateDoc toDocEntity(CandidateDocDTO dto, Candidate owner) {
+        if (dto == null) return null;
+
+        CandidateDoc entity = new CandidateDoc();
+        entity.setCandidate(owner);                 // set relation
+        entity.setUanNo(dto.getUanNo());
+        entity.setPanNo(dto.getPanNo());
+        entity.setAadhaar(dto.getAadhaar());        // map case difference
+        return entity;
+    }
+
+    public void updateDocEntity(CandidateDoc target, CandidateDocDTO dto) {
+        if (target == null || dto == null) return;
+        target.setUanNo(dto.getUanNo());
+        target.setPanNo(dto.getPanNo());
+        target.setAadhaar(dto.getAadhaar());
+    }
+
+    // ---------- tiny helper to avoid accidental NullPointerExceptions ----------
+    private interface supplier<T> { T get(); }
+    private static <T> T safe(supplier<T> s) {
+        try { return s.get(); } catch (Exception ignored) { return null; }
+    }
 }

@@ -1,9 +1,7 @@
 package com.zinios.onboard.service;
 
-import com.zinios.onboard.DTO.CandidateRequestDTO;
-import com.zinios.onboard.DTO.CandidateUpdateDTO;
-import com.zinios.onboard.DTO.ChangePasswordRequest;
-import com.zinios.onboard.DTO.UserRequest;
+import com.zinios.onboard.DTO.*;
+import com.zinios.onboard.Entity.Candidate;
 import com.zinios.onboard.Entity.User;
 import com.zinios.onboard.Entity.UserType;
 import com.zinios.onboard.Mapper.UserMapper;
@@ -15,13 +13,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper mapper;
     private final PasswordEncoder passwordEncoder;
-    private final CandidateRepository candidateRepository;
+    private final CandidateService candidateService;
+
 
     public User registerUser(UserRequest request, String createdBy) {
         if(userRepository.existsByEmail(request.getEmail())) {
@@ -74,16 +75,16 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void savePersonalDetails(CandidateRequestDTO dto) {
-        User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new ZiniosException("No User found", HttpStatus.BAD_REQUEST));
-        if(user.getUserType() != UserType.CANDIDATE) {
-            throw new ZiniosException("Not a candidate", HttpStatus.BAD_REQUEST);
+    public void deleteUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ZiniosException("User not found with email: " + email, HttpStatus.BAD_REQUEST));
+        if(!user.isActive()) {
+            throw new ZiniosException("User account is inactive", HttpStatus.BAD_REQUEST);
         }
-        mapper.toCandidate(user, dto);
-    }
-
-    public void updatePersonalDetails(String email, CandidateUpdateDTO dto) {
-        mapper.updateCandidate(email, dto);
+        user.setActive(false);
+        if(user.getUserType() == UserType.CANDIDATE) {
+            candidateService.deleteCandidate(email);
+        }
+        userRepository.save(user);
     }
 }

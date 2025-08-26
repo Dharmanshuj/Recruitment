@@ -51,6 +51,20 @@ public class JwtService {
                 .compact();
     }
 
+    public Long getUserIdFromAuthHeader(String authHeader) {
+        if (authHeader == null) return null;
+        String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
+        return getUserIdFromToken(token);
+    }
+
+    public Long getUserIdFromToken(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        Number uid = claims.get("id", Number.class);
+        if (uid != null) return uid.longValue();
+        return null;
+    }
+
+
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }

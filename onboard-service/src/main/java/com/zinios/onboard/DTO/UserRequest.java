@@ -18,6 +18,8 @@ public class UserRequest {
     @NotBlank(message = "Password cannot be black")
     private String password;
 
+    private Long referenceId;
+
     private String phoneNumber;
 
     private String employeeId;

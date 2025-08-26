@@ -7,6 +7,9 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Data
 public class CandidateUpdateDTO {
@@ -42,8 +45,8 @@ public class CandidateUpdateDTO {
     private String totalEXP;
 
     @Size(max = 4000, message = "projects must not exceed 4000 characters")
-    private String projects;
+    private List<Map<String, Object>> projects;
 
-    private String prevOrg;
+    private Map<String, Object> prevOrg;
     private String prevOrgManagerEmail;
 }

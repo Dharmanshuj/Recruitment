@@ -29,6 +29,9 @@ public class User implements UserDetails {
     @Email
     private String email;
 
+    @Column(nullable = true)
+    private Long referenceId;
+
     @Column(nullable = false)
     private String password;
 
@@ -42,7 +45,7 @@ public class User implements UserDetails {
     private UserType userType;
 
     @Column
-    private boolean isActive;
+    private boolean isActive = true;
 
     private String createdBy;
     private String updatedBy;
