@@ -5,9 +5,9 @@ import com.zinios.onboard.Entity.Candidate;
 import com.zinios.onboard.Entity.User;
 import com.zinios.onboard.Entity.UserType;
 import com.zinios.onboard.Mapper.UserMapper;
-import com.zinios.onboard.Repository.CandidateRepository;
 import com.zinios.onboard.Repository.UserRepository;
 import com.zinios.onboard.exception.ZiniosException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +24,7 @@ public class UserService {
     private final CandidateService candidateService;
 
 
+    @Transactional
     public User registerUser(UserRequest request, String createdBy) {
         if(userRepository.existsByEmail(request.getEmail())) {
             throw new ZiniosException("User with email " + request.getEmail() + "already exists.", HttpStatus.BAD_REQUEST);
@@ -36,6 +37,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
     public User addUser(UserRequest request, String createdBy) {
         if(userRepository.existsByEmail(request.getEmail())) {
             throw new ZiniosException("User with email " + request.getEmail() + "already exists.", HttpStatus.BAD_REQUEST);
@@ -58,6 +60,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
     public void changePassword(String email, ChangePasswordRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ZiniosException("User not found with email: " + email, HttpStatus.BAD_REQUEST));
@@ -75,6 +78,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void deleteUser(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ZiniosException("User not found with email: " + email, HttpStatus.BAD_REQUEST));

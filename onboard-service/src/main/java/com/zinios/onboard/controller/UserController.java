@@ -1,16 +1,13 @@
 package com.zinios.onboard.controller;
 
 import com.zinios.onboard.DTO.*;
-import com.zinios.onboard.Entity.Candidate;
 import com.zinios.onboard.Entity.User;
-import com.zinios.onboard.Repository.CandidateRepository;
-import com.zinios.onboard.exception.ZiniosException;
 import com.zinios.onboard.service.CandidateService;
 import com.zinios.onboard.service.InviteService;
 import com.zinios.onboard.service.JwtService;
 import com.zinios.onboard.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.http.HttpServletRequest;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor

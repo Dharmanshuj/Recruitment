@@ -11,6 +11,7 @@ import com.zinios.onboard.Repository.CandidateProDetailsRepository;
 import com.zinios.onboard.Repository.CandidateRepository;
 import com.zinios.onboard.Repository.UserRepository;
 import com.zinios.onboard.exception.ZiniosException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class CandidateService {
     private final CandidateDocRepository candidateDocRepository;
     private final UserMapper mapper;
 
+    @Transactional
     public CandidateResponseDTO savePersonalDetails(Long userId, CandidateRequestDTO dto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ZiniosException("No User found", HttpStatus.BAD_REQUEST));
@@ -47,6 +49,7 @@ public class CandidateService {
         return mapper.toResponseDTO(candidate);
     }
 
+    @Transactional
     public CandidateResponseDTO updatePersonalDetails(Long userId, CandidateUpdateDTO dto) {
         Candidate candidate = candidateRepository.findByUserIdAndUserIsActiveTrue(userId)
                 .orElseThrow(() -> new ZiniosException("Candidate not found", HttpStatus.BAD_REQUEST));
@@ -55,6 +58,7 @@ public class CandidateService {
         return mapper.toResponseDTO(candidate);
     }
 
+    @Transactional
     public CandidateResponseDTO saveDocuments(Long userId, CandidateDocDTO dto) {
         Candidate candidate = candidateRepository.findByUserIdAndUserIsActiveTrue(userId)
                 .orElseThrow(() -> new ZiniosException("Candidate not found", HttpStatus.BAD_REQUEST));
@@ -65,6 +69,7 @@ public class CandidateService {
         return mapper.toResponseDTO(candidate);
     }
 
+    @Transactional
     public CandidateResponseDTO updateDocuments(Long userId, CandidateDocDTO dto) {
         Candidate candidate = candidateRepository.findByUserIdAndUserIsActiveTrue(userId)
                 .orElseThrow(() -> new ZiniosException("Candidate not found", HttpStatus.BAD_REQUEST));
@@ -83,7 +88,7 @@ public class CandidateService {
     }
 
     public List<CandidateResponseDTO> getAllCandidates() {
-        List<Candidate> candidates = candidateRepository.findAll();
+        List<Candidate> candidates = candidateRepository.findAllByIsActiveTrue();
         return candidates.stream().map(mapper::toResponseDTO).toList();
     }
 
@@ -92,6 +97,7 @@ public class CandidateService {
         return candidates.stream().map(mapper::toResponseDTO).toList();
     }
 
+    @Transactional
     public void deleteCandidate(String email) {
         Candidate candidate = candidateRepository.findByEmailAndIsActiveTrue(email)
                 .orElseThrow(() -> new ZiniosException("No Candidate found", HttpStatus.BAD_REQUEST));

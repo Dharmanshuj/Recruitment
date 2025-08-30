@@ -30,6 +30,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String whitelistUrls;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        return uri.startsWith("/swagger-ui")
+                || uri.startsWith("/v3/api-docs")
+                || uri.startsWith("/api-docs")
+                || uri.startsWith("/swagger-resources")
+                || uri.startsWith("/webjars")
+                || uri.equals("/")                     // optional
+                || uri.equals("/swagger-ui.html");     // optional
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, 
                                    FilterChain filterChain) throws ServletException, IOException {
         

@@ -10,6 +10,7 @@ import com.zinios.onboard.Repository.CandidateRepository;
 import com.zinios.onboard.Repository.InviteRepository;
 import com.zinios.onboard.Repository.UserRepository;
 import com.zinios.onboard.exception.ZiniosException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,7 @@ public class InviteService {
         emailService.sendEmail(request.getCandidateEmail(), subject, body);
     }
 
+    @Transactional
     public boolean updateStatus(Long inviteId, String status, String password) {
         Optional<Invite> optionalInvite = inviteRepository.findById(inviteId);
         if(optionalInvite.isEmpty()) return false;
