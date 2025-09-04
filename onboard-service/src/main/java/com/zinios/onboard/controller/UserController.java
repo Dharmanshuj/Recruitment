@@ -1,15 +1,18 @@
 package com.zinios.onboard.controller;
 
 import com.zinios.onboard.DTO.*;
+import com.zinios.onboard.Entity.ENUM.DateFilter;
 import com.zinios.onboard.Entity.User;
 import com.zinios.onboard.service.CandidateService;
 import com.zinios.onboard.service.InviteService;
 import com.zinios.onboard.service.JwtService;
 import com.zinios.onboard.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @SecurityRequirement(name = "bearerAuth")
@@ -88,5 +92,35 @@ public class UserController {
     public ResponseEntity<String> deleteCandidate(@RequestParam String email) {
         candidateService.deleteCandidate(email);
         return ResponseEntity.ok("Deleted Successfully");
+    }
+
+    @GetMapping("/getRecruiters")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'HR')")
+    public ResponseEntity<List<UserResponse>> getRecruiters() {
+        return ResponseEntity.ok(userService.getAllRecruiters());
+    }
+
+    @GetMapping("/{recruiterId}/stats")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'HR')")
+    public ResponseEntity<RecruiterStatsResponse> getRecruiterStats(
+            @PathVariable Long recruiterId,
+            @RequestParam DateFilter filter,
+            @Parameter(
+                    description = "Start date (yyyy-MM-dd'T'HH:mm:ss) - required only if filter=CUSTOM",
+                    example = "2025-09-01T00:00:00"
+            )
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime startDate,
+            @Parameter(
+                    description = "Start date (yyyy-MM-dd'T'HH:mm:ss) - required only if filter=CUSTOM",
+                    example = "2025-09-01T00:00:00"
+            )
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime endDate
+    ) {
+        RecruiterStatsResponse stats = userService.getRecruiterStats(recruiterId, filter, startDate, endDate);
+        return ResponseEntity.ok(stats);
     }
 }

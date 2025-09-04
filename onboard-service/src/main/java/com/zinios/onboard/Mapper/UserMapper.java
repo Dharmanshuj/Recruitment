@@ -222,6 +222,26 @@ public class UserMapper {
         target.setAadhaar(dto.getAadhaar());
     }
 
+    public UserResponse toUserResponse(User user) {
+        if (user == null) {
+            return null;
+        }
+
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setName(user.getName());
+        response.setEmail(user.getEmail());
+        response.setReferenceId(user.getReferenceId());
+        response.setPhoneNumber(user.getPhoneNumber());
+        response.setEmployeeId(user.getEmployeeId());
+        response.setUserType(user.getUserType());
+        response.setCreatedBy(user.getCreatedBy());
+        response.setUpdatedBy(user.getUpdatedBy());
+        response.setUpdatedTime(user.getUpdatedTime());
+
+        return response;
+    }
+
     // ---------- tiny helper to avoid accidental NullPointerExceptions ----------
     private interface supplier<T> { T get(); }
     private static <T> T safe(supplier<T> s) {

@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -103,5 +104,10 @@ public class CandidateService {
                 .orElseThrow(() -> new ZiniosException("No Candidate found", HttpStatus.BAD_REQUEST));
         candidate.setActive(false);
         candidateRepository.save(candidate);
+    }
+
+    @Transactional
+    public Long countCandidates(Long id, LocalDateTime start, LocalDateTime end) {
+        return candidateRepository.countCandidatesByRecruiterAndDate(id, start, end);
     }
 }

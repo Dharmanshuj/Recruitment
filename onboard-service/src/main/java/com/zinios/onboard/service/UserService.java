@@ -1,7 +1,7 @@
 package com.zinios.onboard.service;
 
 import com.zinios.onboard.DTO.*;
-import com.zinios.onboard.Entity.Candidate;
+import com.zinios.onboard.Entity.ENUM.DateFilter;
 import com.zinios.onboard.Entity.User;
 import com.zinios.onboard.Entity.UserType;
 import com.zinios.onboard.Mapper.UserMapper;
@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -90,5 +91,33 @@ public class UserService {
             candidateService.deleteCandidate(email);
         }
         userRepository.save(user);
+    }
+
+    public List<UserResponse> getAllRecruiters() {
+        List<User> recruiters = userRepository.findAllByUserTypeAndIsActiveTrue(UserType.RECRUITER);
+        return recruiters.stream().map(mapper::toUserResponse).toList();
+    }
+
+    public RecruiterStatsResponse getRecruiterStats(Long recruiterId, DateFilter filter,
+                                                    LocalDateTime customStart, LocalDateTime customEnd) {
+        LocalDateTime startDate = null;
+        LocalDateTime endDate = LocalDateTime.now();
+
+        switch (filter) {
+            case THIS_WEEK -> startDate = LocalDateTime.now().with(java.time.DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+            case THIS_MONTH -> startDate = LocalDateTime.now().withDayOfMonth(1).toLocalDate().atStartOfDay();
+            case THIS_YEAR -> startDate = LocalDateTime.now().withDayOfYear(1).toLocalDate().atStartOfDay();
+            case CUSTOM -> {
+                startDate = customStart;
+                endDate = customEnd;
+            }
+            case ALL -> {
+                startDate = null;
+                endDate = null;
+            }
+        }
+
+        Long total = candidateService.countCandidates(recruiterId, startDate, endDate);
+        return new RecruiterStatsResponse(recruiterId, total);
     }
 }
